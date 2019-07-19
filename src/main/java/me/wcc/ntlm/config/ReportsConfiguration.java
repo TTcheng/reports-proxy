@@ -1,6 +1,7 @@
 package me.wcc.ntlm.config;
 
 import io.undertow.Undertow;
+import me.wcc.ntlm.proxy.AbstractReportsProxy;
 import me.wcc.ntlm.proxy.BasicReportsProxy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -21,11 +22,12 @@ public class ReportsConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "reports", value = {"username", "password", "domain"})
-    BasicReportsProxy basicAuthHttpClient(@Value("${reports.username}") String username,
-                                          @Value("${reports.password}") String password,
-                                          @Value("${reports.domain}") String domain) {
+    public AbstractReportsProxy reportsProxy(@Value("${reports.username}") String username,
+                                             @Value("${reports.password}") String password,
+                                             @Value("${reports.domain}") String domain) {
         return new BasicReportsProxy(username, password, domain);
     }
+
 
     @Bean
     @ConditionalOnClass(Undertow.class)

@@ -144,6 +144,10 @@ public abstract class AbstractReportsProxy {
     }
 
     public ResponseEntity<byte[]> proxy(HttpServletRequest request, HttpServletResponse response, String body) {
+        return proxy(request, response, body, null);
+    }
+
+    public ResponseEntity<byte[]> proxy(HttpServletRequest request, HttpServletResponse response, String body, String uri) {
         // 请求体转换
         HttpEntity entity = null;
         if (null != body) {
@@ -156,20 +160,23 @@ public abstract class AbstractReportsProxy {
             headers.removeIf(header -> header.getName().trim().toLowerCase().startsWith("content-length"));
         }
         // URI和及其请求参数
-        String queryString = Optional.ofNullable(request.getQueryString()).orElse("");
-        String originUri = request.getRequestURI();
-        if (queryString.startsWith("id=") && originUri.startsWith("/powerbi/")) {
-            UrlUtils.getUrlParam(queryString, "host");
-            try {
-                queryString = URLEncoder.encode(queryString, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                log.warn("Failed to Encode unescaped queryString: {}", queryString, e);
+        String targetUri = uri;
+        if (null == uri) {
+            String queryString = Optional.ofNullable(request.getQueryString()).orElse("");
+            String originUri = request.getRequestURI();
+            if (queryString.startsWith("id=") && originUri.startsWith("/powerbi/")) {
+                UrlUtils.getUrlParam(queryString, "host");
+                try {
+                    queryString = URLEncoder.encode(queryString, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    log.warn("Failed to Encode unescaped queryString: {}", queryString, e);
+                }
             }
+            targetUri = originUri + '?' + queryString;
         }
-        final String uri = originUri + '?' + queryString;
 
         // 代理执行请求
-        HttpResponse httpResponse = execute(request.getMethod(), uri, entity, headers);
+        HttpResponse httpResponse = execute(request.getMethod(), targetUri, entity, headers);
         if (null == httpResponse) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

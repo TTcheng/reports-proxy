@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
-import me.wcc.ntlm.proxy.BasicReportsProxy;
+import me.wcc.ntlm.proxy.AbstractReportsProxy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,20 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class ProxyController {
-    private final BasicReportsProxy basicClient;
+    private final AbstractReportsProxy reportsProxy;
 
-    public ProxyController(BasicReportsProxy basicClient) {
-        this.basicClient = basicClient;
+    public ProxyController(AbstractReportsProxy reportsProxy) {
+        this.reportsProxy = reportsProxy;
     }
 
     @GetMapping(value = {"/reports/**", "/powerbi/**"})
     public ResponseEntity<byte[]> getProxy(HttpServletRequest request, HttpServletResponse response) {
-        return basicClient.proxy(request, response, "");
+        return reportsProxy.proxy(request, response, "");
     }
 
     @RequestMapping(value = {"/reports/**", "/powerbi/**"})
     public ResponseEntity<byte[]> proxy(HttpServletRequest request, HttpServletResponse response,
                                         @RequestBody String body) {
-        return basicClient.proxy(request, response, body);
+        return reportsProxy.proxy(request, response, body);
     }
 }
