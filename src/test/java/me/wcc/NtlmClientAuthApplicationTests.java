@@ -1,4 +1,4 @@
-package me.wcc.ntlm;
+package me.wcc;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

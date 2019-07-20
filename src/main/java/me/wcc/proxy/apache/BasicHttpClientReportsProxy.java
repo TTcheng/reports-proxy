@@ -1,4 +1,4 @@
-package me.wcc.ntlm.proxy;
+package me.wcc.proxy.apache;
 
 import java.util.Base64;
 
@@ -15,12 +15,12 @@ import org.springframework.http.HttpHeaders;
  */
 @Slf4j
 
-public class BasicReportsProxy extends AbstractReportsProxy {
+public class BasicHttpClientReportsProxy extends ApacheProxyClient {
     private String username;
     private String password;
     private String domain;
 
-    public BasicReportsProxy(String username, String password, String domain) {
+    public BasicHttpClientReportsProxy(String username, String password, String domain) {
         this.username = username;
         this.password = password;
         this.domain = domain;
@@ -33,7 +33,7 @@ public class BasicReportsProxy extends AbstractReportsProxy {
     }
 
     @Override
-    String getDomain() {
+    public String getDomain() {
         return domain;
     }
 

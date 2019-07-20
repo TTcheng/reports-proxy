@@ -1,4 +1,4 @@
-package me.wcc.ntlm.proxy;
+package me.wcc.proxy.apache;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,13 +10,13 @@ import org.apache.http.client.methods.HttpUriRequest;
  * @author chuncheng.wang@hand-china.com
  */
 @Slf4j
-public class NtlmReportsProxy extends AbstractReportsProxy {
+public class NtlmHttpClientReportsProxy extends ApacheProxyClient {
     private String username;
     private String password;
     private String domain;
     private String workstation;
 
-    public NtlmReportsProxy(String username, String password, String domain, String workstation) {
+    public NtlmHttpClientReportsProxy(String username, String password, String domain, String workstation) {
         this.username = username;
         this.password = password;
         this.domain = domain;
@@ -30,7 +30,7 @@ public class NtlmReportsProxy extends AbstractReportsProxy {
     }
 
     @Override
-    String getDomain() {
+    public String getDomain() {
         return domain;
     }
 

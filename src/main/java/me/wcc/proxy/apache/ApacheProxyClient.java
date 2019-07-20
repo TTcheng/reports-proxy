@@ -1,4 +1,4 @@
-package me.wcc.ntlm.proxy;
+package me.wcc.proxy.apache;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,8 +10,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
-import me.wcc.ntlm.http.HttpDelete;
-import me.wcc.ntlm.util.UrlUtils;
+import me.wcc.http.HttpDelete;
+import me.wcc.proxy.BaseProxyClient;
+import me.wcc.util.UrlUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -41,7 +42,7 @@ import org.springframework.lang.Nullable;
  */
 @Slf4j
 @Contract(threading = ThreadingBehavior.SAFE)
-public abstract class AbstractReportsProxy {
+public abstract class ApacheProxyClient extends BaseProxyClient {
     private static final String ACCEPT = "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, */*";
     private static final String ACCEPT_ENCODING = "gzip, deflate, br";
     private static final String ACCEPT_LANG = "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3";
@@ -75,7 +76,7 @@ public abstract class AbstractReportsProxy {
                 .build();
     }
 
-    protected AbstractReportsProxy() {
+    protected ApacheProxyClient() {
     }
 
     /**
@@ -84,13 +85,6 @@ public abstract class AbstractReportsProxy {
      * @return credentials
      */
     abstract Credentials getCredentials();
-
-    /**
-     * 获取域名
-     *
-     * @return 域名
-     */
-    abstract String getDomain();
 
     public HttpResponse get(String uri, Header[] headers) {
         // 为保证线程安全，需要每次都创建一个实例
@@ -117,7 +111,7 @@ public abstract class AbstractReportsProxy {
     }
 
     public HttpResponse delete(String uri, HttpEntity entity, Header[] headers) {
-        me.wcc.ntlm.http.HttpDelete httpDelete = new HttpDelete();
+        me.wcc.http.HttpDelete httpDelete = new HttpDelete();
         httpDelete.setHeaders(headers);
         httpDelete.setURI(URI.create(getDomain() + uri));
         httpDelete.setEntity(entity);
@@ -143,10 +137,14 @@ public abstract class AbstractReportsProxy {
         return cookieStore.getCookies();
     }
 
-    public ResponseEntity<byte[]> proxy(HttpServletRequest request, HttpServletResponse response, String body) {
-        return proxy(request, response, body, null);
+    @Override
+    public ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response, String uri) {
+        Header[] headers = getAllRequestHeaderArray(request);
+        HttpResponse httpResponse = get(uri, headers);
+        return processResponse(httpResponse, request, response);
     }
 
+    @Override
     public ResponseEntity<byte[]> proxy(HttpServletRequest request, HttpServletResponse response, String body, String uri) {
         // 请求体转换
         HttpEntity entity = null;
@@ -155,7 +153,7 @@ public abstract class AbstractReportsProxy {
         }
 
         // 请求头
-        List<Header> headers = getAllRequestHeaders(request);
+        List<Header> headers = getAllRequestHeaderList(request);
         if (null != entity) {
             headers.removeIf(header -> header.getName().trim().toLowerCase().startsWith("content-length"));
         }
@@ -177,6 +175,11 @@ public abstract class AbstractReportsProxy {
 
         // 代理执行请求
         HttpResponse httpResponse = execute(request.getMethod(), targetUri, entity, headers);
+        return processResponse(httpResponse, request, response);
+    }
+
+    private ResponseEntity<byte[]> processResponse(HttpResponse httpResponse, HttpServletRequest servletRequest,
+                                                   HttpServletResponse servletResponse) {
         if (null == httpResponse) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -195,10 +198,10 @@ public abstract class AbstractReportsProxy {
         // 响应头
         Header[] allHeaders = httpResponse.getAllHeaders();
         for (Header header : allHeaders) {
-            response.setHeader(header.getName(), header.getValue());
+            servletResponse.setHeader(header.getName(), header.getValue());
         }
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, request.getHeader(HttpHeaders.ORIGIN));
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+        servletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, servletRequest.getHeader(HttpHeaders.ORIGIN));
+        servletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         String contentType = DEFAULT_CONTENT_TYPE;
         long contentLength = -1L;
@@ -249,7 +252,7 @@ public abstract class AbstractReportsProxy {
      */
     abstract void beforeExecute(HttpUriRequest httpRequest);
 
-    private List<Header> getAllRequestHeaders(HttpServletRequest request) {
+    private List<Header> getAllRequestHeaderList(HttpServletRequest request) {
         Enumeration<String> headerNames = request.getHeaderNames();
         List<Header> headers = new ArrayList<>();
         while (headerNames.hasMoreElements()) {
@@ -257,7 +260,15 @@ public abstract class AbstractReportsProxy {
             Header header = new BasicHeader(name, request.getHeader(name));
             headers.add(header);
         }
+        headers.removeIf(header -> ifRemoveHeader(header.getName()));
         return headers;
+    }
+
+    private Header[] getAllRequestHeaderArray(HttpServletRequest request) {
+        List<Header> headerList = getAllRequestHeaderList(request);
+        final Header[] headerArray = new Header[headerList.size()];
+        headerList.toArray(headerArray);
+        return headerArray;
     }
 
     public HttpResponse execute(HttpUriRequest httpRequest) {

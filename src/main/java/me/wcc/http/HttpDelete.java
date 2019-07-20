@@ -1,4 +1,4 @@
-package me.wcc.ntlm.http;
+package me.wcc.http;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.springframework.http.HttpMethod;

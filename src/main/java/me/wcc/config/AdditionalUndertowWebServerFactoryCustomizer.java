@@ -1,4 +1,4 @@
-package me.wcc.ntlm.config;
+package me.wcc.config;
 
 import io.undertow.UndertowOptions;
 import org.springframework.boot.autoconfigure.web.ServerProperties;

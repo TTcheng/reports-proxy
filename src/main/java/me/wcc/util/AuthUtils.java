@@ -1,4 +1,4 @@
-package me.wcc.ntlm.util;
+package me.wcc.util;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package me.wcc.ntlm.util;
+package me.wcc.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

@@ -1,4 +1,4 @@
-package me.wcc.ntlm;
+package me.wcc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
