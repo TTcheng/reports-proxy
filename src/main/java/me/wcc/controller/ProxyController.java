@@ -25,7 +25,7 @@ public class ProxyController {
 
     @GetMapping(value = {"/reports/**", "/powerbi/**"})
     public ResponseEntity<byte[]> getProxy(HttpServletRequest request, HttpServletResponse response) {
-        return proxyClient.proxy(request, response, "");
+        return proxyClient.proxyGet(request, response);
     }
 
     @RequestMapping(value = {"/reports/**", "/powerbi/**"})

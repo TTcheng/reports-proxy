@@ -50,6 +50,7 @@ public abstract class ApacheProxyClient extends BaseProxyClient {
     private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0";
 
     private static final String DEFAULT_CONTENT_TYPE = "text/plain";
+    private static final String DEFAULT_ENCODING = "UTF-8";
     // Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; WOW64; Trident/6.0; .NET4.0E; .NET4.0C; .NET CLR 3.5.30729; .NET CLR 2.0.50727; .NET CLR 3.0.30729)
 
     public static final Header[] HEADERS = new Header[]{
@@ -145,11 +146,23 @@ public abstract class ApacheProxyClient extends BaseProxyClient {
     }
 
     @Override
+    public String proxyGet(String url) {
+        HttpResponse response = execute(new HttpGet(url));
+        String result = "";
+        try {
+            result = EntityUtils.toString(response.getEntity(), DEFAULT_ENCODING);
+        } catch (IOException e) {
+            log.debug("Request failed when parsing response to string");
+        }
+        return result;
+    }
+
+    @Override
     public ResponseEntity<byte[]> proxy(HttpServletRequest request, HttpServletResponse response, String body, String uri) {
         // 请求体转换
         HttpEntity entity = null;
         if (null != body) {
-            entity = new StringEntity(body, Charset.forName("UTF-8"));
+            entity = new StringEntity(body, Charset.forName(DEFAULT_ENCODING));
         }
 
         // 请求头
@@ -165,7 +178,7 @@ public abstract class ApacheProxyClient extends BaseProxyClient {
             if (queryString.startsWith("id=") && originUri.startsWith("/powerbi/")) {
                 UrlUtils.getUrlParam(queryString, "host");
                 try {
-                    queryString = URLEncoder.encode(queryString, "UTF-8");
+                    queryString = URLEncoder.encode(queryString, DEFAULT_ENCODING);
                 } catch (UnsupportedEncodingException e) {
                     log.warn("Failed to Encode unescaped queryString: {}", queryString, e);
                 }

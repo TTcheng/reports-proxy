@@ -31,6 +31,8 @@ public interface ProxyClient {
      */
     ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response, String uri);
 
+    String proxyGet(String url);
+
     /**
      * 代理请求，保持uri保持不变
      *
