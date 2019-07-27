@@ -142,7 +142,16 @@ public abstract class ApacheProxyClient extends BaseProxyClient {
     public ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response, String uri) {
         // 如果uri为空，则使用request的URI、
         String finalUri = Optional.ofNullable(uri).orElse(Optional.ofNullable(request.getQueryString())
-                .map(queryString -> request.getRequestURI() + '?' + queryString).orElse(request.getRequestURI()));
+                .map(queryString -> {
+                    String encodeQueryString = queryString;
+                    try {
+                        encodeQueryString = URLEncoder.encode(queryString, DEFAULT_ENCODING);
+                    } catch (UnsupportedEncodingException e) {
+                        log.warn("Failed to encode queryString:{}", queryString, e);
+                    }
+                    return request.getRequestURI() + '?' + encodeQueryString;
+                })
+                .orElse(request.getRequestURI()));
         Header[] headers = getAllRequestHeaderArray(request);
         HttpResponse httpResponse = get(finalUri, headers);
         return processResponse(httpResponse, request, response);
