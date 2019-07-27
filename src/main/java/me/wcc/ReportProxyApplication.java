@@ -8,10 +8,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author jesse
  */
 @SpringBootApplication
-public class NtlmAuthApplication {
+public class ReportProxyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NtlmAuthApplication.class, args);
+        SpringApplication.run(ReportProxyApplication.class, args);
     }
 
 }

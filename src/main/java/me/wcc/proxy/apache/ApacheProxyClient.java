@@ -140,8 +140,11 @@ public abstract class ApacheProxyClient extends BaseProxyClient {
 
     @Override
     public ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response, String uri) {
+        // 如果uri为空，则使用request的URI、
+        String finalUri = Optional.ofNullable(uri).orElse(Optional.ofNullable(request.getQueryString())
+                .map(queryString -> request.getRequestURI() + '?' + queryString).orElse(request.getRequestURI()));
         Header[] headers = getAllRequestHeaderArray(request);
-        HttpResponse httpResponse = get(uri, headers);
+        HttpResponse httpResponse = get(finalUri, headers);
         return processResponse(httpResponse, request, response);
     }
 

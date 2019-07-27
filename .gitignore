@@ -1,3 +1,6 @@
+# ttcheng
+src/main/resources/application-dev.properties
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
