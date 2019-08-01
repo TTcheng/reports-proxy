@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
  * @author chuncheng.wang@hand-china.com 19-7-20 下午3:57
  */
 public interface ProxyClient {
-    String DEFAULT_CONTENT_TYPE = "text/plain";
 
     /**
      * 代理get请求，保持uri保持不变
@@ -18,8 +17,8 @@ public interface ProxyClient {
      * @param response HttpServletRequest
      * @return 字节响应体
      */
-    default ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response) {
-        return proxyGet(request, response, null);
+    default ResponseEntity<byte[]> getBytes(HttpServletRequest request, HttpServletResponse response) {
+        return getBytes(request, response, null);
     }
 
     /**
@@ -27,11 +26,18 @@ public interface ProxyClient {
      *
      * @param request  HttpServletRequest
      * @param response HttpServletRequest
+     * @param uri      指定uri
      * @return 字节响应体
      */
-    ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response, String uri);
+    ResponseEntity<byte[]> getBytes(HttpServletRequest request, HttpServletResponse response, String uri);
 
-    String proxyGet(String url);
+    /**
+     * get请求并以字符串返回
+     *
+     * @param uri uri
+     * @return String
+     */
+    String get(String uri);
 
     /**
      * 代理请求，保持uri保持不变

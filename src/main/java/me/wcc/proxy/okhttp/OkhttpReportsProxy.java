@@ -37,15 +37,15 @@ public class OkhttpReportsProxy extends BaseProxyClient {
     }
 
     @Override
-    public ResponseEntity<byte[]> proxyGet(HttpServletRequest request, HttpServletResponse response, String uri) {
+    public ResponseEntity<byte[]> getBytes(HttpServletRequest request, HttpServletResponse response, String uri) {
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, request.getHeader(HttpHeaders.ORIGIN));
         return restTemplate.getForEntity(getUrl(request, uri), byte[].class);
     }
 
     @Override
-    public String proxyGet(String url) {
-        return restTemplate.getForObject(url, String.class);
+    public String get(String uri) {
+        return restTemplate.getForObject(getDomain() + uri, String.class);
     }
 
     @Override

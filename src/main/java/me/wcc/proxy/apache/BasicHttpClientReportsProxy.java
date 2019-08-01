@@ -15,7 +15,7 @@ import org.springframework.http.HttpHeaders;
  */
 @Slf4j
 
-public class BasicHttpClientReportsProxy extends ApacheProxyClient {
+public class BasicHttpClientReportsProxy extends BaseApacheProxyClient {
     private String username;
     private String password;
     private String domain;

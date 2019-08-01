@@ -10,7 +10,7 @@ import org.apache.http.client.methods.HttpUriRequest;
  * @author chuncheng.wang@hand-china.com
  */
 @Slf4j
-public class NtlmHttpClientReportsProxy extends ApacheProxyClient {
+public class NtlmHttpClientReportsProxy extends BaseApacheProxyClient {
     private String username;
     private String password;
     private String domain;

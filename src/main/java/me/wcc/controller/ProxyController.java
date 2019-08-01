@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import me.wcc.proxy.ProxyClient;
+import me.wcc.util.PowerbiUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,9 +24,16 @@ public class ProxyController {
         this.proxyClient = proxyClient;
     }
 
+    @GetMapping(value = {"/powerbi/"})
+    public ResponseEntity<byte[]> proxyPowerbi(HttpServletRequest request, HttpServletResponse response) {
+        // 这个uri存在大括号
+        final String finalUri = request.getRequestURI() + '?' + PowerbiUtils.encodeUrl(request.getQueryString());
+        return proxyClient.getBytes(request, response, finalUri);
+    }
+
     @GetMapping(value = {"/reports/**", "/powerbi/**"})
     public ResponseEntity<byte[]> getProxy(HttpServletRequest request, HttpServletResponse response) {
-        return proxyClient.proxyGet(request, response);
+        return proxyClient.getBytes(request, response);
     }
 
     @RequestMapping(value = {"/reports/**", "/powerbi/**"})
